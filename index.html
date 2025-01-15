@@ -12,6 +12,7 @@
             { name: "Stop C", url: "https://www3.septa.org/hackathon/BusSchedules/?req1=16129" }
         ];
         const busData = {};
+
         function fetchBusData() {
             const promises = stops.map(stop =>
                 fetch(stop.url)
@@ -23,50 +24,66 @@
             );
             return Promise.all(promises);
         }
+
         function calculateTimeDifference(schedule) {
             const now = new Date();
             const scheduledDate = new Date(schedule);
+            if (isNaN(scheduledDate)) {
+                console.error("Invalid date format:", schedule);
+                return "Invalid time";
+            }
             const difference = scheduledDate - now;
             const minutesDifference = Math.ceil(difference / (1000 * 60));
             return minutesDifference <= 0 ? "Now" : `${minutesDifference} 分钟`;
         }
+
         function displayWebpage() {
             const container = document.createElement('div');
             document.body.appendChild(container);
+
+            // Stop A - Route 45
             const stopAData = busData["Stop A"];
-            if (stopAData) {
-                const routeKeys = Object.keys(stopAData);
-                if (routeKeys.length > 0) {
-                    const nextBus = stopAData[routeKeys[0]][0];
-                    const timeLeft = calculateTimeDifference(nextBus.DateCalender);
-                    const stopAText = document.createElement('p');
-                    stopAText.textContent = `去唐人街: ${timeLeft} 分钟`;
-                    container.appendChild(stopAText);
-                }
+            if (stopAData && stopAData["45"]) {
+                const nextBus = stopAData["45"][0];
+                const timeLeft = calculateTimeDifference(nextBus.DateCalender);
+                const stopAText = document.createElement('p');
+                stopAText.textContent = `去唐人街: ${timeLeft} 分钟`;
+                container.appendChild(stopAText);
+            } else {
+                const stopAText = document.createElement('p');
+                stopAText.textContent = "去唐人街: Data unavailable";
+                container.appendChild(stopAText);
             }
+
+            // Stop B - Route 45
             const stopBData = busData["Stop B"];
-            if (stopBData) {
-                const routeKeys = Object.keys(stopBData);
-                if (routeKeys.length > 0) {
-                    const nextBus = stopBData[routeKeys[0]][0];
-                    const timeLeft = calculateTimeDifference(nextBus.DateCalender);
-                    const stopBText = document.createElement('p');
-                    stopBText.textContent = `从餐馆回家: ${timeLeft} 分钟`;
-                    container.appendChild(stopBText);
-                }
+            if (stopBData && stopBData["45"]) {
+                const nextBus = stopBData["45"][0];
+                const timeLeft = calculateTimeDifference(nextBus.DateCalender);
+                const stopBText = document.createElement('p');
+                stopBText.textContent = `从餐馆回家: ${timeLeft} 分钟`;
+                container.appendChild(stopBText);
+            } else {
+                const stopBText = document.createElement('p');
+                stopBText.textContent = "从餐馆回家: Data unavailable";
+                container.appendChild(stopBText);
             }
+
+            // Stop C - Route 45
             const stopCData = busData["Stop C"];
-            if (stopCData) {
-                const routeKeys = Object.keys(stopCData);
-                if (routeKeys.length > 0) {
-                    const nextBus = stopCData[routeKeys[0]][0];
-                    const timeLeft = calculateTimeDifference(nextBus.DateCalender);
-                    const stopCText = document.createElement('p');
-                    stopCText.textContent = `从唐人街回家: ${timeLeft} 分钟`;
-                    container.appendChild(stopCText);
-                }
+            if (stopCData && stopCData["45"]) {
+                const nextBus = stopCData["45"][0];
+                const timeLeft = calculateTimeDifference(nextBus.DateCalender);
+                const stopCText = document.createElement('p');
+                stopCText.textContent = `从唐人街回家: ${timeLeft} 分钟`;
+                container.appendChild(stopCText);
+            } else {
+                const stopCText = document.createElement('p');
+                stopCText.textContent = "从唐人街回家: Data unavailable";
+                container.appendChild(stopCText);
             }
         }
+
         fetchBusData().then(displayWebpage);
     </script>
 </body>
