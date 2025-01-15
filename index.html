@@ -1,2 +1,82 @@
-<h1> a </h1>
-fetch('https://www3.septa.org/')
+const stops = [
+    { name: "Stop A", url: "https://www3.septa.org/hackathon/BusSchedules/?req1=16601" },
+    { name: "Stop B", url: "https://www3.septa.org/hackathon/BusSchedules/?req1=16131" },
+    { name: "Stop C", url: "https://www3.septa.org/hackathon/BusSchedules/?req1=16129" }
+];
+
+const busData = {};
+
+function fetchBusData() {
+    fetch(stops[0].url)
+        .then(response => response.json())
+        .then(data => {
+            busData["Stop A"] = data.bus;
+        })
+        .catch(error => console.error("Error fetching data for Stop A:", error));
+
+    fetch(stops[1].url)
+        .then(response => response.json())
+        .then(data => {
+            busData["Stop B"] = data.bus;
+        })
+        .catch(error => console.error("Error fetching data for Stop B:", error));
+
+    fetch(stops[2].url)
+        .then(response => response.json())
+        .then(data => {
+            busData["Stop C"] = data.bus;
+        })
+        .catch(error => console.error("Error fetching data for Stop C:", error));
+}
+
+function calculateTimeDifference(schedule) {
+    const now = new Date();
+    const [time, period] = schedule.split(' ').slice(1);
+    const [hours, minutes] = time.split(':').map(Number);
+
+    let scheduledHours = hours;
+    if (period === 'pm' && hours !== 12) scheduledHours += 12;
+    if (period === 'am' && hours === 12) scheduledHours = 0;
+
+    const scheduledDate = new Date();
+    scheduledDate.setHours(scheduledHours, minutes, 0, 0);
+
+    const difference = scheduledDate - now;
+    const minutesDifference = Math.ceil(difference / (1000 * 60));
+    return minutesDifference <= 0 ? "Now" : `${minutesDifference} minutes`;
+}
+
+function displayWebpage() {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+
+    const stopAData = busData["Stop A"];
+    if (stopAData) {
+        const nextBus = stopAData[0];
+        const timeLeft = calculateTimeDifference(nextBus.DateCalender);
+        const stopAText = document.createElement('p');
+        stopAText.textContent = `去唐人街: ${timeLeft} 分钟`;
+        container.appendChild(stopAText);
+    }
+
+    const stopBData = busData["Stop B"];
+    if (stopBData) {
+        const nextBus = stopBData[0];
+        const timeLeft = calculateTimeDifference(nextBus.DateCalender);
+        const stopBText = document.createElement('p');
+        stopBText.textContent = `从餐馆回家: ${timeLeft} 分钟 `;
+        container.appendChild(stopBText);
+    }
+
+    const stopCData = busData["Stop C"];
+    if (stopCData) {
+        const nextBus = stopCData[0];
+        const timeLeft = calculateTimeDifference(nextBus.DateCalender);
+        const stopCText = document.createElement('p');
+        stopCText.textContent = `从唐人街回家: ${timeLeft} 分钟`;
+        container.appendChild(stopCText);
+    }
+}
+
+fetchBusData();
+setTimeout(displayWebpage, 3000);
